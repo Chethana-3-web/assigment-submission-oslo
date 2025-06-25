@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Submissions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-image: url('fi.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            padding-top: 100px; /* Creates space between header and container */
+            padding-bottom: 80px; /* Creates space between footer and container */
+        }
+
+
+        header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    height: 58px;
+}
+
+header img {
+    height: 60px;
+}
+
+        .submission-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 450px;
+            margin-top: 100px;
+        }
+        .submission-item {
+            padding: 10px;
+            border: 1px solid #c4c1c1;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .submission-item a {
+            color: #5443249e;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .submission-item a:hover {
+            text-decoration: underline;
+        }
+
+
+         /* Chatbot Icon and Window Styles */
+         .chatbot-icon {
+            position: fixed;
+            left: 20px;
+            bottom: 30px;
+            width:30px;
+            height:30px;
+            color: white;
+            background-color: rgba(158, 137, 107, 0.553);
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 20px;
+            z-index: 20;
+        }
+
+        .chatbot-window {
+            position: fixed;
+            left: 20px;
+            bottom: 80px;
+            width: 250px;
+            max-height: 300px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 20;
+            overflow-y: auto;
+        }
+
+        .chatbot-header {
+            background-color: #271b0d;
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+            text-align: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .chatbot-content {
+            padding: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .chatbot-question {
+            padding: 8px;
+            background-color: #f4f4f4;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="Oslo Campus Logo">
+        <center><p style="margin-right: 500px; font-family: Arial, sans-serif; font-size: 28px;color: rgb(88, 63, 31);">Available report submissions</p></center>
+    </header>
+  
+    <div id="submissions" class="submission-container"></div>
+<script>
+    // Fetch submissions data from the PHP script
+fetch('load_submissions.php')
+    .then(response => response.json())
+    .then(data => {
+        const submissionsContainer = document.getElementById('submissions');
+        const currentDate = new Date().toISOString().split("T")[0]; // Get today's date in 'YYYY-MM-DD' format
+
+        data.forEach(submission => {
+            // Convert the start and end dates from MM/DD/YYYY to YYYY-MM-DD
+            const startDate = convertToDateFormat(submission.start_date); // Convert start date
+            const endDate = convertToDateFormat(submission.end_date); // Convert end date
+
+            // Check if the current date falls within the submission period
+            if (currentDate >= startDate && currentDate <= endDate) {
+                // Create HTML for the active submission
+                const submissionItem = document.createElement('div');
+                submissionItem.classList.add('submission-item');
+                submissionItem.innerHTML = `
+                    <p><strong>Group:</strong> ${submission.group}</p>
+                    <p><strong>Submission Period:</strong> ${startDate} to ${endDate}</p>
+                    <p><a href="project_submission.html">Upload Report</a></p>
+                `;
+                submissionsContainer.appendChild(submissionItem);
+            }
+        });
+
+        // If no submissions are available
+        if (submissionsContainer.children.length === 0) {
+            submissionsContainer.innerHTML = "<p>No active submissions available at this time.</p>";
+        }
+    })
+    .catch(error => {
+        console.error("Error loading submissions:", error);
+        document.getElementById('submissions').innerHTML = "<p>Error loading submissions.</p>";
+    });
+
+// Function to convert MM/DD/YYYY to YYYY-MM-DD format
+function convertToDateFormat(dateString) {
+    const [month, day, year] = dateString.split("/"); // Split MM/DD/YYYY into month, day, year
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // Return YYYY-MM-DD format
+}
+
+</script>
+
+<!-- Chatbot Icon -->
+<div class="chatbot-icon" onclick="toggleChatbot()"><img class="chatbot-icon" src="chat.png"></div>
+
+<!-- Chatbot Window -->
+<div class="chatbot-window" id="chatbotWindow">
+    <div class="chatbot-header">Help & Guidance</div>
+    <div class="chatbot-content">
+        <div class="chatbot-question" onclick="displayAnswer('How to submit a report?')">How to submit a report?</div>
+        <div class="chatbot-question" onclick="displayAnswer('What file formats are accepted?')">What file formats are accepted?</div>
+        <div class="chatbot-question" onclick="displayAnswer('How to edit a file before submission?')">How to edit a file before submission?</div>
+        <div class="chatbot-question" onclick="displayAnswer('Who to contact for help?')">Who to contact for help?</div>
+        <div class="status-message" id="answerMessage"></div>
+        
+    </div>
+</div>
+
+<script>
+    // Toggle the chatbot window display
+    function toggleChatbot() {
+        const chatbotWindow = document.getElementById("chatbotWindow");
+        chatbotWindow.style.display = chatbotWindow.style.display === "block" ? "none" : "block";
+    }
+
+    // Display an answer message based on selected question
+    function displayAnswer(question) {
+        const answerMessage = document.getElementById("answerMessage");
+        let answer = '';
+
+        switch (question) {
+            case 'How to submit a report?':
+                answer = 'First, click the relevent upload report button.\nTo submit, upload your file and click the Submit button.';
+                break;
+            case 'What file formats are accepted?':
+                answer = 'Accepted formats: .doc, .docx, .pdf, .odt, .rtf, etc.';
+                break;
+            case 'How to edit a file before submission?':
+                answer = 'Click "Edit" next to the file name, then select a new file.';
+                break;
+            case 'Who to contact for help?':
+                answer = 'For help, contact the support team at 0706125515';
+                break;
+            default:
+                answer = 'Please select a question.';
+                break;
+        }
+
+        answerMessage.innerText = answer;
+    }
+
+    // Toggle the chatbot window display
+function toggleChatbot() {
+    const chatbotWindow = document.getElementById("chatbotWindow");
+    chatbotWindow.style.display = chatbotWindow.style.display === "block" ? "none" : "block";
+
+    // Add or remove the outside click listener based on chatbot visibility
+    if (chatbotWindow.style.display === "block") {
+        document.addEventListener("click", closeChatbotOnClickOutside);
+    } else {
+        document.removeEventListener("click", closeChatbotOnClickOutside);
+    }
+}
+
+// Function to close chatbot when clicking outside
+function closeChatbotOnClickOutside(event) {
+    const chatbotWindow = document.getElementById("chatbotWindow");
+    const chatbotIcon = document.querySelector(".chatbot-icon");
+
+    if (!chatbotWindow.contains(event.target) && !chatbotIcon.contains(event.target)) {
+        chatbotWindow.style.display = "none";
+        document.removeEventListener("click", closeChatbotOnClickOutside);
+    }
+}
+
+</script>
+</body>
+</html>
